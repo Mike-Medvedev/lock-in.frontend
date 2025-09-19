@@ -1,11 +1,30 @@
 import { useTheme } from "@/theme/themeContext"
 import { Text } from "react-native"
-export default function ThemedText({ children, variant }: { children: React.ReactNode, variant?: "title" | "heading" }){
-    const theme = useTheme()
 
-    return <Text style={{color: theme.text.defaultColor, 
-        fontSize: 
-        variant === "title" ? theme.text.fontSizeXL :
-        variant === "heading" ? theme.text.fontSizeLarge :
-        theme.text.fontSizeBase}}>{children}</Text>
+interface Props {
+  children: React.ReactNode
+  variant?: "title" | "heading" | "default" | "secondary" | "success"
+  color?: string
+}
+
+export default function ThemedText({ children, color, variant = "default" }: Props) {
+  const theme = useTheme()
+
+  const fontSize =
+    variant === "title"
+      ? theme.text.fontSizeXL
+      : variant === "heading"
+      ? theme.text.fontSizeLarge
+      : theme.text.fontSizeBase
+
+  const textColor =
+    color
+      ? color
+      : variant === "secondary"
+      ? theme.text.secondaryColor 
+      : variant === "success"
+      ? theme.text.successText
+      : theme.text.defaultColor
+
+  return <Text style={{ color: textColor, fontSize }}>{children}</Text>
 }

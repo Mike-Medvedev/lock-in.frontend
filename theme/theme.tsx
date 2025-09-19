@@ -3,10 +3,11 @@
 const primitives = {
     color: {
         green: "#20A761",
+        green1: "#D0F1DF",
         lightGreen: "#62D097",
-        darkGreen: "#305252",
-        grey: "#EEE5E9",
-        lightGrey: "#869498",
+        darkGreen: "#1C5F3C",
+        grey: "#969696",
+        lightGrey: "#DDDDDD",
         white: "#ffffff",
         black: "#131516",
         lightBlack: "#373E40",
@@ -76,16 +77,16 @@ const semantic = {
         primaryVariant: primitives.color.lightGreen,
         onPrimary: primitives.color.white,
         onSurface: primitives.color.black,
-        background: primitives.color.lightGrey,
+        background: primitives.color.white,
         text: primitives.color.black,
         secondaryText: primitives.color.grey,
         successText: primitives.color.darkGreen,
         errorText: primitives.color.red,
         surface: primitives.color.white,
-        success: primitives.color.lightGreen,
+        success: primitives.color.green1,
         error: primitives.color.red,
         warning: primitives.color.yellow,
-        border: primitives.color.grey,
+        border: primitives.color.lightGrey,
         focusRing: primitives.color.lightGreen,
         focusError: primitives.color.red,
         
@@ -99,6 +100,7 @@ const semantic = {
         radiusSmall: primitives.radius.radiusS,
         radiusMedium: primitives.radius.radiusM,
         radiusLarge: primitives.radius.radiusL,
+        radiusXL: primitives.radius.radiusXL
     },
     typography: {
         fontWeightNormal: primitives.typography.fontWeight4,
@@ -114,8 +116,7 @@ const semantic = {
         borderWidthSmall: primitives.border.borderWidth1,
         borderWidthMedium: primitives.border.borderWidth2,
         borderWidthLarge: primitives.border.borderWidth3,
-        borderColorDefault: primitives.color.lightGrey,
-        borderColorPrimary: primitives.color.green,      
+        borderColorDefault: primitives.color.lightGrey,    
         borderColorSuccess: primitives.color.lightGreen,
         borderColorError: primitives.color.red 
     },
@@ -174,14 +175,17 @@ const theme = {
     card: {
         background: semantic.color.surface, 
         border: semantic.color.border,       
+        borderWidth: semantic.border.borderWidthSmall,
         shadow: semantic.shadow.shadowSmall,  
         radius: semantic.radius.radiusMedium, 
         padding: semantic.spacing.spacingLarge,
-        margin: semantic.spacing.spacingMedium
+        margin: semantic.spacing.spacingMedium,
+        successBackgroundColor: semantic.color.success,
+        successBorderColor: semantic.border.borderColorSuccess
       },
     badge: {
         borderColor: semantic.border.borderColorDefault,
-        borderRadius: semantic.radius.radiusLarge,
+        borderRadius: semantic.radius.radiusXL,
         borderWidth: semantic.border.borderWidthSmall,
         padding: semantic.spacing.spacingSmall,
         success: {
