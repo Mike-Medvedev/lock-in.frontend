@@ -1,13 +1,15 @@
 import { useTheme } from "@/theme/themeContext"
 import { Text } from "react-native"
+import { TextStyle } from "react-native/Libraries/StyleSheet/StyleSheetTypes"
 
 interface Props {
   children: React.ReactNode
   variant?: "title" | "heading" | "default" | "secondary" | "success"
-  color?: string
+  color?: string,
+  styles?: TextStyle
 }
 
-export default function ThemedText({ children, color, variant = "default" }: Props) {
+export default function ThemedText({ children, color, variant = "default", styles }: Props) {
   const theme = useTheme()
 
   const fontSize =
@@ -25,6 +27,8 @@ export default function ThemedText({ children, color, variant = "default" }: Pro
       : variant === "success"
       ? theme.text.successText
       : theme.text.defaultColor
+    
+    const fontWeight = variant === "success" ?  theme.text.fontWeightBold : theme.text.fontWeightNormal
 
-  return <Text style={{ color: textColor, fontSize }}>{children}</Text>
+  return <Text style={[{ color: textColor, fontSize: fontSize, fontWeight: fontWeight as any }, styles]}>{children}</Text>
 }

@@ -14,7 +14,7 @@ export default function Card({children, variant}: CardProps){
         borderColor: theme.card.border, borderRadius: theme.card.radius, 
         borderWidth: theme.card.borderWidth,
         padding: theme.card.padding, 
-        margin: theme.card.margin,
+        marginVertical: theme.card.margin,
         shadowColor: "black",
         shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.2

@@ -5,5 +5,6 @@ export default function Badge({ children }: { children: React.ReactNode }){
     return <View style={{backgroundColor: theme.badge.success.backgroundColor,
         borderWidth: theme.badge.borderWidth, borderRadius: theme.badge.borderRadius,
         borderColor: theme.badge.success.borderColor,
-        paddingHorizontal: theme.badge.padding }}><Text style={{color: theme.badge.success.color}}>{children}</Text></View>
+        paddingHorizontal: theme.badge.padding,
+        alignSelf: "flex-start"}}><Text style={{color: theme.badge.success.color}}>{children}</Text></View>
 }
