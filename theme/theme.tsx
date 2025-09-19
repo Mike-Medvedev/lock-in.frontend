@@ -166,7 +166,7 @@ const theme = {
         margin: semantic.spacing.spacingSmall
     },
     background: {
-        app: semantic.color.background, 
+        color: semantic.color.background, 
       },
       
     card: {
@@ -221,3 +221,4 @@ const theme = {
 
 export default theme
 
+export type Theme = typeof theme
