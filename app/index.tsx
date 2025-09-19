@@ -10,13 +10,16 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <ThemedText>Edit app/index.tsx to edit this screen. hi</ThemedText>
+      <ThemedText variant="title">Custom Components</ThemedText>
+      <ThemedText variant="heading">Custom Heading</ThemedText>
       <Badge>$50</Badge>
       <Button></Button>
-      <Card>?</Card>
-      <Icon>?</Icon>
+      <Card>
+        <ThemedText>Card</ThemedText>
+      </Card>
+      <Icon name="menu" size="medium" />
       <Image />
-      <ProgressBar>?</ProgressBar>
+      <ProgressBar />
     </View>
     </Background>
   );

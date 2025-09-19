@@ -1,6 +1,8 @@
 import { useTheme } from "@/theme/themeContext"
-import { Text } from "react-native"
-export default function ProgressBar({ children }: { children: React.ReactNode }){
+import { View } from "react-native"
+export default function ProgressBar({value = 0}: {value?: number}){
     const theme = useTheme()
-    return <Text style={{color: theme.text.defaultColor}}>{children}</Text>
+    return <View style={{backgroundColor: theme.progressBar.backgroundColor, width: 150, height: 10, borderRadius: theme.progressBar.borderRadius}}>
+        <View style={{width: `${value}%`, backgroundColor: theme.progressBar.loadingColor, height: 10, borderRadius: theme.progressBar.borderRadius}}></View>
+    </View>
 }

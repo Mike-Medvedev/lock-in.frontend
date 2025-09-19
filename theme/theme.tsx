@@ -74,6 +74,8 @@ const semantic = {
         primaryActive: primitives.color.lightGreen,
         primaryHover: primitives.color.darkGreen,
         primaryVariant: primitives.color.lightGreen,
+        onPrimary: primitives.color.white,
+        onSurface: primitives.color.black,
         background: primitives.color.lightGrey,
         text: primitives.color.black,
         secondaryText: primitives.color.grey,
@@ -160,9 +162,9 @@ const theme = {
         borderRadius: semantic.radius.radiusMedium,
         focusRing: semantic.color.focusRing,
         focusError: semantic.color.focusError,
-        color: semantic.color.text,
+        color: semantic.color.onPrimary,
         shadow: semantic.shadow.shadowMedium,
-        padding: semantic.spacing.spacingSmall,
+        padding: semantic.spacing.spacingMedium,
         margin: semantic.spacing.spacingSmall
     },
     background: {
@@ -174,7 +176,7 @@ const theme = {
         border: semantic.color.border,       
         shadow: semantic.shadow.shadowSmall,  
         radius: semantic.radius.radiusMedium, 
-        padding: semantic.spacing.spacingMedium,
+        padding: semantic.spacing.spacingLarge,
         margin: semantic.spacing.spacingMedium
       },
     badge: {
