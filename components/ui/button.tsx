@@ -4,18 +4,20 @@ import { Pressable, StyleSheet, Text } from "react-native"
 type ButtonProps = {
   variant?: "outlined" | "filled"
   children?: React.ReactNode
+  left?: React.ReactNode
 }
 
-export default function Button({ variant = "filled", children }: ButtonProps) {
+export default function Button({ variant = "filled", children , left}: ButtonProps) {
   const theme = useTheme()
 
   const styles = StyleSheet.create({
     base: {
       borderRadius: theme.button.borderRadius,
       padding: theme.button.padding,
-      minWidth: 50,
-      maxWidth: 100,
+      flex: 1,
+      gap: 8,
       justifyContent: "center",
+      flexDirection: "row",
       alignItems: "center",
       margin: theme.button.margin,
       shadowColor: "black",
@@ -49,6 +51,7 @@ export default function Button({ variant = "filled", children }: ButtonProps) {
         variant === "outlined" && styles.outlined,
       ]}
     >
+        {left && left}
       <Text style={[styles.text, variant === "outlined" && styles.textOutlined]}>
         {children || "A Button"}
       </Text>

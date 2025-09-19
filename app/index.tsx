@@ -1,6 +1,7 @@
 import { Background, Badge, Button, Card, Icon, ProgressBar, ThemedText } from "@/components/ui";
 import { useTheme } from "@/theme/themeContext";
-import { View } from "react-native";
+import Feather from '@expo/vector-icons/Feather';
+import { ScrollView, View } from "react-native";
 export default function Index() {
   const theme = useTheme()
 
@@ -9,14 +10,13 @@ export default function Index() {
   </View>
   return (
     <Background>
-    <View
+    <ScrollView
       style={{
-        flex: 1,
         padding: theme.card.padding
       }}
     >
       <View style={{flexDirection: "row", gap: "16"}}>
-        {ico}
+     
       <View>
       <ThemedText variant="title">Lock-In</ThemedText>
       <ThemedText variant="secondary">Stay Commited, earn rewards</ThemedText>
@@ -26,42 +26,72 @@ export default function Index() {
       
       <Card>
         <View style={{width: "100%"}}>
-          <ThemedText variant="secondary">Your Balance</ThemedText>
-          <ThemedText variant="title">$156.40</ThemedText>
-      
-          <Icon name="arrow-up-right-box-outline" size="large" />
-          <Button></Button>
-          <Button variant="outlined"></Button>
+          <View style={{flexDirection: "row", gap: 16, marginBottom: 32}}>
+            {ico}
+            <View style={{flex: 1}}>
+            <ThemedText variant="secondary">Your Balance</ThemedText>
+            <ThemedText variant="title">$156.40</ThemedText>
+            </View>
+            <Feather name="arrow-up-right" size={24} color="grey" />
+          </View>
+
+          
+      <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+      <Button left={<Icon name="add" color="white"/>}>Add Funds</Button>
+      <Button variant="outlined" left={<Feather name="arrow-down-left" size={16} color="grey" />}>Withdraw</Button>
+      </View>
+          
+          
         </View>
       
       </Card>
-
-      <ThemedText variant="title">Active Commitments</ThemedText>
-      <ThemedText variant="secondary">Keep up the momentum</ThemedText>
-      <ThemedText variant="success">View All →</ThemedText>
+      <View style={{flexDirection: "row"}}>
+      <View style={{flex: 1}}>
+        <ThemedText variant="title">Active Commitments</ThemedText>
+        <ThemedText variant="secondary">Keep up the momentum</ThemedText>
+      </View>
+        <ThemedText styles={{alignSelf: "center"}}variant="success">View All →</ThemedText>
+      </View>
+      
+      
 
       <Card>
-      <View style={{width: "100%"}}>
-        <View style={{flexDirection: "row"}}>
-          <View>
-          <ThemedText variant="heading">Morning Run Challenge</ThemedText>
-          <ThemedText variant="secondary">Running 4x per week for 2 weeks</ThemedText>
+        <View style={{width: "100%"}}>
+          <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+            <View>
+            <ThemedText variant="heading">Morning Run Challenge</ThemedText>
+            <ThemedText variant="secondary">Running 4x day 2 weeks</ThemedText>
+            </View>
+            <View style={{alignSelf: "center"}}>
+            <Badge >$50</Badge>
+            </View>
+            
           </View>
-          <Badge>$50</Badge>
-        </View>
-        <View style={{flexDirection: "row", justifyContent: "space-between"}}>
-        <ThemedText  styles={{fontWeight: "bold"}} variant="secondary">Progress</ThemedText>
-        <ThemedText styles={{fontWeight: "bold"}}>5/8</ThemedText>
-        </View>
-        <ProgressBar value={50}/>
+
+          <View style={{ marginTop: 24, marginBottom: 16, gap: 4}}>
+            <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+              <ThemedText  styles={{fontWeight: "bold"}} variant="secondary">Progress</ThemedText>
+              <ThemedText styles={{fontWeight: "bold"}}>5/8</ThemedText>
+            </View>
+            <ProgressBar value={50}/>
+          </View>
         
-        <View style={{flexDirection: "row", justifyContent: "space-around"}}>
-          <Icon name="calendar"/>
-          <ThemedText variant="secondary">6 days left</ThemedText>
-          <ThemedText variant="success">+$10 bonus</ThemedText>
-        </View>
+          <View style={{flexDirection: "row", gap: 8}}>
+            <Feather name="calendar" size={16} color="grey" />
+            <ThemedText styles={{flex: 1}} variant="secondary">6 days left</ThemedText>
+            <ThemedText variant="success">+$10 bonus</ThemedText>
+          </View>
         </View>
       </Card>
+      <Card variant="primary">
+            <View style={{alignItems: "center", gap: 16}}>
+              <Button><Icon name="add" size="large" color="white" /></Button>
+    
+              <ThemedText variant="heading">Ready for your next challenge?</ThemedText>
+              <ThemedText variant="secondary">Set a new goal, put some money on the line, and watch yourself succeed.</ThemedText>
+              <Button>Create New Commitment</Button>
+            </View>
+          </Card>
 
       {/* <ThemedText variant="heading">Custom Heading</ThemedText>
       <Badge>$50</Badge>
@@ -72,7 +102,7 @@ export default function Index() {
       <Icon name="arrow-up" size="medium" />
       <Image />
       <ProgressBar /> */}
-    </View>
+    </ScrollView>
     </Background>
   );
 }
