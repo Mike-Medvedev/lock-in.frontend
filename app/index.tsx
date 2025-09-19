@@ -1,5 +1,5 @@
-import Background from "@/components/ui/background";
-import { Text, View } from "react-native";
+import { Background, Badge, Button, Card, Icon, Image, ProgressBar, ThemedText } from "@/components/ui";
+import { View } from "react-native";
 export default function Index() {
   return (
     <Background>
@@ -10,7 +10,13 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen. hi</Text>
+      <ThemedText>Edit app/index.tsx to edit this screen. hi</ThemedText>
+      <Badge>$50</Badge>
+      <Button></Button>
+      <Card>?</Card>
+      <Icon>?</Icon>
+      <Image />
+      <ProgressBar>?</ProgressBar>
     </View>
     </Background>
   );
