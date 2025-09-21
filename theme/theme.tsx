@@ -69,7 +69,7 @@ const primitives = {
     
 }
 
-const semantic = {
+export const semantic = {
     color: {
         primary: primitives.color.green,
         primaryActive: primitives.color.lightGreen,

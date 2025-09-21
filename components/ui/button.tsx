@@ -1,20 +1,23 @@
 import { useTheme } from "@/theme/themeContext"
-import { Pressable, StyleSheet, Text } from "react-native"
+import { Pressable, StyleSheet } from "react-native"
+import ThemedText from "./themedText"
 
 type ButtonProps = {
   variant?: "outlined" | "filled"
   children?: React.ReactNode
   left?: React.ReactNode
+  disabled?: boolean
+  title?: string
+  onPress?: () => void
 }
 
-export default function Button({ variant = "filled", children , left}: ButtonProps) {
+export default function Button({ variant = "filled", children, left, disabled = false, onPress, title}: ButtonProps) {
   const theme = useTheme()
 
   const styles = StyleSheet.create({
     base: {
       borderRadius: theme.button.borderRadius,
       padding: theme.button.padding,
-      flex: 1,
       gap: 8,
       justifyContent: "center",
       flexDirection: "row",
@@ -43,6 +46,8 @@ export default function Button({ variant = "filled", children , left}: ButtonPro
 
   return (
     <Pressable
+    disabled={disabled}
+    onPress={onPress}
       style={({ pressed }) => [
         styles.base,
         variant === "filled" && {
@@ -52,9 +57,9 @@ export default function Button({ variant = "filled", children , left}: ButtonPro
       ]}
     >
         {left && left}
-      <Text style={[styles.text, variant === "outlined" && styles.textOutlined]}>
-        {children || "A Button"}
-      </Text>
+      <ThemedText styles={{...styles.text, ...(variant === "outlined" ? styles.textOutlined : {})}}>
+        {title || children || "A Button"}
+      </ThemedText>
     </Pressable>
   )
 }

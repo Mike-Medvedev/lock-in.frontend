@@ -1,10 +1,11 @@
 import { Background, Badge, Button, Card, Icon, ProgressBar, ThemedText } from "@/components/ui";
 import { useTheme } from "@/theme/themeContext";
 import Feather from '@expo/vector-icons/Feather';
+import { useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 export default function Index() {
   const theme = useTheme()
-
+  const router = useRouter()
   const ico =  <View style={{backgroundColor: "#1B8C59", width: 50, height: 50, borderRadius: theme.badge.borderRadius, justifyContent: "center", alignItems: "center"}}>
   <Icon name="arrow-up" size="large" color="white" />
   </View>
@@ -27,8 +28,8 @@ export default function Index() {
 
           
       <View style={{flexDirection: "row", justifyContent: "space-between"}}>
-      <Button left={<Icon name="add" color="white"/>}>Add Funds</Button>
-      <Button variant="outlined" left={<Feather name="arrow-down-left" size={16} color="grey" />}>Withdraw</Button>
+      <Button left={<Icon name="add" color="white"/>}  title="Add Funds"/>
+      <Button variant="outlined" title="Withdraw" left={<Feather name="arrow-down-left" size={16} color="grey" />}/>
       </View>
           
           
@@ -79,11 +80,11 @@ export default function Index() {
 
       <Card variant="primary">
             <View style={{alignItems: "center", gap: 16}}>
-              <Button><Icon name="add" size="large" color="white" /></Button>
+              <Button onPress={() => router.push("/createCommitment")} ><Icon name="add" size="large" color="white" /></Button>
     
               <ThemedText variant="heading">Ready for your next challenge?</ThemedText>
               <ThemedText variant="secondary">Set a new goal, put some money on the line, and watch yourself succeed.</ThemedText>
-              <Button>Create New Commitment</Button>
+              <Button title="Create New Commitment" />
             </View>
           </Card>
 
