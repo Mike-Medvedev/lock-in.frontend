@@ -1,6 +1,6 @@
+import { useCheckoutScreen } from "@/components/checkoutscreen";
 import { DollarInput } from "@/components/ui";
 import theme from "@/theme/theme";
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -9,13 +9,13 @@ const durations = ["1 Week", "2 Weeks", "3 Weeks", "1 Month"];
 const frequencies = ["3x per week", "4x per week", "5x per week", "6x per week", "Daily ✅"];
 
 export default function CreateCommitmentStepper() {
-const router = useRouter()
   const [step, setStep] = useState(0);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [selectedFrequency, setSelectedFrequency] = useState<string | null>(null);
-  const [stake, setStake] = useState("50");
+  const [stake, setStake] = useState(0);
 
+  const handlePayment = useCheckoutScreen(stake);
   const steps = [
     {
       title: "Choose Activity",
@@ -53,7 +53,7 @@ const router = useRouter()
     {
       title: "Set Your Stake",
       content: (
-        <DollarInput />
+        <DollarInput onChange={(v) => setStake(v)}/>
 
       ),
       helper:
@@ -76,25 +76,41 @@ const router = useRouter()
 
   const isLast = step === steps.length - 1;
 
+  const isFirst = step === 0;
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>{steps[step].title}</Text>
       <View style={styles.stepContent}>{steps[step].content}</View>
       {steps[step].helper && <Text style={styles.helper}>{steps[step].helper}</Text>}
 
-      <Pressable
-        style={[styles.nextButton, !isLast && { marginTop: theme.button.margin }]}
-        onPress={() => {
-          if (!isLast) setStep(step + 1);
-          else {
-            console.log("Lock In with data:", { selectedActivity, selectedDuration, selectedFrequency, stake });
-            router.push("/checkoutscreen")
-
-          };
-        }}
-      >
-        <Text style={styles.nextButtonText}>{isLast ? `Lock In with $${stake}` : "Next"}</Text>
-      </Pressable>
+      <View style={styles.buttonContainer}>
+        {!isFirst && (
+          <Pressable
+            style={[styles.backButton, styles.halfButton]}
+            onPress={() => setStep(step - 1)}
+          >
+            <Text style={styles.backButtonText}>Back</Text>
+          </Pressable>
+        )}
+        
+        <Pressable
+          style={[
+            styles.nextButton, 
+            isFirst ? styles.fullButton : styles.halfButton,
+            { marginTop: theme.button.margin }
+          ]}
+          onPress={async () => {
+            if (!isLast) setStep(step + 1);
+            else {
+              console.log("Lock In with data:", { selectedActivity, selectedDuration, selectedFrequency, stake });
+              await handlePayment()
+            };
+          }}
+        >
+          <Text style={styles.nextButtonText}>{isLast ? `Lock In with $${stake}` : "Next"}</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -186,8 +202,21 @@ const styles = StyleSheet.create({
     fontSize: theme.text.fontSizeBase,
     color: theme.text.defaultColor,
   },
+  buttonContainer: {
+    flexDirection: "row",
+    gap: theme.button.margin,
+  },
   nextButton: {
     backgroundColor: theme.button.background,
+    borderRadius: theme.button.borderRadius,
+    padding: theme.button.padding,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backButton: {
+    backgroundColor: "transparent",
+    borderWidth: theme.button.borderWidth,
+    borderColor: theme.button.borderColor,
     borderRadius: theme.button.borderRadius,
     padding: theme.button.padding,
     alignItems: "center",
@@ -197,5 +226,16 @@ const styles = StyleSheet.create({
     color: theme.button.color,
     fontSize: theme.text.fontSizeLarge,
     fontWeight: theme.text.fontWeightBold as any,
+  },
+  backButtonText: {
+    color: theme.text.defaultColor,
+    fontSize: theme.text.fontSizeLarge,
+    fontWeight: theme.text.fontWeightBold as any,
+  },
+  fullButton: {
+    flex: 1,
+  },
+  halfButton: {
+    flex: 1,
   },
 });

@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui";
 import { useStripe } from "@stripe/stripe-react-native";
-import { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import { useState } from "react";
+import { Alert } from "react-native";
 
 const API_URL = "http://localhost:8000"
 
-export default function CheckoutScreen() {
+export function useCheckoutScreen(amount: number) {
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [loading, setLoading] = useState(false);
+
   
     const fetchPaymentSheetParams = async () => {
       try {
@@ -17,6 +17,7 @@ export default function CheckoutScreen() {
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({"amount" : amount * 100})
         });
         const { paymentIntent } = await response.json();
         return { paymentIntent };
@@ -44,21 +45,24 @@ export default function CheckoutScreen() {
         if (error) {
           console.log('Init payment sheet error:', error);
           Alert.alert('Initialization Error', error.message);
+          return false;
         } else {
           console.log('Payment sheet initialized successfully');
           setLoading(true);
+          return true;
         }
       } catch (error) {
         console.log('Failed to initialize payment sheet:', error);
         Alert.alert('Error', 'Failed to initialize payment system');
+        return false;
       }
     };
   
     const openPaymentSheet = async () => {
         try {
-          await initializePaymentSheet();
+          const initialized = await initializePaymentSheet();
           
-          if (loading) {
+          if (initialized) {
             const { error } = await presentPaymentSheet();
             console.log('Present payment sheet error:', error);
             if (error) {
@@ -66,8 +70,6 @@ export default function CheckoutScreen() {
             } else {
               Alert.alert('Success', 'Your order is confirmed!');
             }
-          } else {
-            Alert.alert('Error', 'Payment sheet not initialized');
           }
         } catch (error) {
           console.log('Open payment sheet error:', error);
@@ -75,14 +77,7 @@ export default function CheckoutScreen() {
         }
     };
   
-    useEffect(() => {
-      initializePaymentSheet();
-    }, []);
+   
   
-    return (
-        <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-            <Button onPress={initializePaymentSheet}  title="Init"/>
-       <Button   onPress={openPaymentSheet} />
-        </View>
-    );
+    return openPaymentSheet;
   }

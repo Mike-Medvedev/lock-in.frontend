@@ -2,8 +2,12 @@ import theme from "@/theme/theme";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-export default function DollarInput() {
-  const [amount, setAmount] = useState(50);
+interface DollarInputProps{
+  onChange: (number: number) => void
+}
+
+export default function DollarInput({onChange}: DollarInputProps) {
+  const [amount, setAmount] = useState(0);
   const [editing, setEditing] = useState(false);
 
   const formatCurrency = (val: number) => {
@@ -26,6 +30,7 @@ export default function DollarInput() {
             const cleaned = text.replace(/[^0-9]/g, "");
             const num = parseInt(cleaned || "0", 10);
             setAmount(num);
+            onChange(num);
           }}
           keyboardType="numeric"
           onBlur={() => setEditing(false)}
