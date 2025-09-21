@@ -1,16 +1,20 @@
 import { useTheme } from "@/theme/themeContext"
-import { View } from "react-native"
+import { Pressable, View } from "react-native"
+import { ViewStyle } from "react-native/Libraries/StyleSheet/StyleSheetTypes"
 
 interface CardProps{
     children?: React.ReactNode,
-    variant?: "primary"
+    variant?: "primary",
+    styles?: ViewStyle,
+    pressable?: boolean,
+    onPress?: () => void
 }
 
-export default function Card({children, variant}: CardProps){
+export default function Card({children, variant, styles, pressable, onPress}: CardProps){
     const theme = useTheme()
 
     const base = {
-        maxWidth: 400, backgroundColor: theme.card.background, 
+        maxWidth: 500, backgroundColor: theme.card.background, 
         borderColor: theme.card.border, borderRadius: theme.card.radius, 
         borderWidth: theme.card.borderWidth,
         padding: theme.card.padding, 
@@ -22,12 +26,22 @@ export default function Card({children, variant}: CardProps){
 
    
 
-    return <View style={[base, {backgroundColor: variant === "primary"
+    const cardStyle = [base, styles, {backgroundColor: variant === "primary"
          ? theme.card.successBackgroundColor 
          : theme.card.background,
          borderColor: variant === "primary"
          ? theme.card.successBorderColor 
-         : theme.card.border }]}>
+         : theme.card.border }]
+
+    if (pressable && onPress) {
+        return (
+            <Pressable style={({pressed}) => [cardStyle, {opacity: pressed ? 0.7 : 1}]} onPress={onPress}>
+                {children}
+            </Pressable>
+        )
+    }
+
+    return <View style={cardStyle}>
             {children}
             </View>
 }

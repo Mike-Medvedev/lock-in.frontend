@@ -15,21 +15,11 @@ export default function Index() {
         padding: theme.card.padding
       }}
     >
-      <View style={{flexDirection: "row", gap: "16"}}>
-     
-      <View>
-      <ThemedText variant="title">Lock-In</ThemedText>
-      <ThemedText variant="secondary">Stay Commited, earn rewards</ThemedText>
-      </View>
-      
-      </View>
-      
-      <Card>
+      <Card styles={{marginTop: 0}}>
         <View style={{width: "100%"}}>
           <View style={{flexDirection: "row", gap: 16, marginBottom: 32}}>
-            {ico}
             <View style={{flex: 1}}>
-            <ThemedText variant="secondary">Your Balance</ThemedText>
+            <ThemedText variant="secondary">Total Balance</ThemedText>
             <ThemedText variant="title">$156.40</ThemedText>
             </View>
             <Feather name="arrow-up-right" size={24} color="grey" />
@@ -54,8 +44,9 @@ export default function Index() {
       </View>
       
       
-
-      <Card>
+      {/** Commitment Card */}
+      <ScrollView horizontal>
+      {[1, 2].map( (num) => <Card pressable onPress={() => console.log('Card pressed!')} styles={{marginRight: 20}} key={num}>
         <View style={{width: "100%"}}>
           <View style={{flexDirection: "row", justifyContent: "space-between"}}>
             <View>
@@ -63,7 +54,7 @@ export default function Index() {
             <ThemedText variant="secondary">Running 4x day 2 weeks</ThemedText>
             </View>
             <View style={{alignSelf: "center"}}>
-            <Badge >$50</Badge>
+            <Badge>$50</Badge>
             </View>
             
           </View>
@@ -82,7 +73,10 @@ export default function Index() {
             <ThemedText variant="success">+$10 bonus</ThemedText>
           </View>
         </View>
-      </Card>
+      </Card>)}
+      </ScrollView>
+
+
       <Card variant="primary">
             <View style={{alignItems: "center", gap: 16}}>
               <Button><Icon name="add" size="large" color="white" /></Button>

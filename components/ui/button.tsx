@@ -48,7 +48,7 @@ export default function Button({ variant = "filled", children , left}: ButtonPro
         variant === "filled" && {
           backgroundColor: pressed ? theme.button.hover : theme.button.background,
         },
-        variant === "outlined" && styles.outlined,
+        variant === "outlined" && {...styles.outlined, backgroundColor: pressed ? "rgb(212, 212, 212)": "transparent"},
       ]}
     >
         {left && left}
