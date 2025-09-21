@@ -65,11 +65,6 @@ export function useCheckoutScreen(amount: number) {
           if (initialized) {
             const { error } = await presentPaymentSheet();
             console.log('Present payment sheet error:', error);
-            if (error) {
-              Alert.alert(`Error code: ${error.code}`, error.message);
-            } else {
-              Alert.alert('Success', 'Your order is confirmed!');
-            }
           }
         } catch (error) {
           console.log('Open payment sheet error:', error);

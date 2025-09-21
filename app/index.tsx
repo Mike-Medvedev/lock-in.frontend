@@ -16,7 +16,7 @@ export default function Index() {
         padding: theme.card.padding
       }}
     >
-      <Card styles={{marginTop: 0}}>
+      {/* <Card styles={{marginTop: 0}}>
         <View style={{width: "100%"}}>
           <View style={{flexDirection: "row", gap: 16, marginBottom: 32}}>
             <View style={{flex: 1}}>
@@ -33,9 +33,9 @@ export default function Index() {
       </View>
           
           
-        </View>
+      </View>
       
-      </Card>
+      </Card> */}
       <View style={{flexDirection: "row"}}>
       <View style={{flex: 1}}>
         <ThemedText variant="title">Active Commitments</ThemedText>
@@ -80,11 +80,11 @@ export default function Index() {
 
       <Card variant="primary">
             <View style={{alignItems: "center", gap: 16}}>
-              <Button onPress={() => router.push("/createCommitment")} ><Icon name="add" size="large" color="white" /></Button>
-    
+              {/* <Button onPress={() => router.push("/createCommitment")} ><Icon name="add" size="large" color="white" /></Button>
+     */}
               <ThemedText variant="heading">Ready for your next challenge?</ThemedText>
               <ThemedText variant="secondary">Set a new goal, put some money on the line, and watch yourself succeed.</ThemedText>
-              <Button title="Create New Commitment" />
+              <Button onPress={() => router.push("/createCommitment")} title="Create New Commitment" />
             </View>
           </Card>
 

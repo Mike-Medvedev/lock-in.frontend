@@ -1,5 +1,5 @@
 import { useCheckoutScreen } from "@/components/checkoutscreen";
-import { DollarInput } from "@/components/ui";
+import { DollarInput, ThemedText } from "@/components/ui";
 import theme from "@/theme/theme";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -14,6 +14,7 @@ export default function CreateCommitmentStepper() {
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [selectedFrequency, setSelectedFrequency] = useState<string | null>(null);
   const [stake, setStake] = useState(0);
+  const [isStakeValid, setIsStakeValid] = useState(true)
 
   const handlePayment = useCheckoutScreen(stake);
   const steps = [
@@ -52,10 +53,18 @@ export default function CreateCommitmentStepper() {
     },
     {
       title: "Set Your Stake",
-      content: (
-        <DollarInput onChange={(v) => setStake(v)}/>
+        content: (
+          <>
+          <DollarInput onChange={(v) => {
+            setStake(v);
+            if (v >= 0.50) {
+              setIsStakeValid(true);
+            }
+          }}/>
+         {!isStakeValid && <ThemedText variant="error" styles={{alignSelf: "center"}}>Minimum Stake is $0.50</ThemedText>}
+         </>
 
-      ),
+        ),
       helper:
         "If you succeed, you get your stake back + rewards. If you fail, you lose your stake.",
     },
@@ -101,6 +110,7 @@ export default function CreateCommitmentStepper() {
             { marginTop: theme.button.margin }
           ]}
           onPress={async () => {
+            if(step===steps.length -2) {if(stake<0.50) {setIsStakeValid(false); return;}}
             if (!isLast) setStep(step + 1);
             else {
               console.log("Lock In with data:", { selectedActivity, selectedDuration, selectedFrequency, stake });
