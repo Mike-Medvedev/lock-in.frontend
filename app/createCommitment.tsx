@@ -1,251 +1,305 @@
-import { useCheckoutScreen } from "@/components/checkoutscreen";
-import { DollarInput, ThemedText } from "@/components/ui";
-import theme from "@/theme/theme";
+import {
+    Background,
+    Button,
+    MoneyInput,
+    ThemedText
+} from "@/components/ui";
+import { useCreateCommitment } from "@/hooks/useCommitments";
+import { useStripePayment } from "@/hooks/useStripePayment";
+import { theme } from "@/theme";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
-const activities = ["Running 🏃‍♂️", "Gym 🏋️‍♀️"];
+const activities = [
+  { id: "running", label: "Running", emoji: "🏃‍♂️" },
+  { id: "gym", label: "Gym", emoji: "🏋️‍♀️" }
+];
+
 const durations = ["1 Week", "2 Weeks", "3 Weeks", "1 Month"];
+
 const frequencies = ["3x per week", "4x per week", "5x per week", "6x per week", "Daily ✅"];
 
-export default function CreateCommitmentStepper() {
-  const [step, setStep] = useState(0);
+export default function CreateCommitment() {
+  const router = useRouter();
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [selectedFrequency, setSelectedFrequency] = useState<string | null>(null);
-  const [stake, setStake] = useState(0);
-  const [isStakeValid, setIsStakeValid] = useState(true)
+  const [stake, setStake] = useState("50");
+  const [isStakeValid, setIsStakeValid] = useState(true);
 
-  const handlePayment = useCheckoutScreen(stake);
-  const steps = [
-    {
-      title: "Choose Activity",
-      content: activities.map((a) => (
-        <OptionButton
-          key={a}
-          label={a}
-          selected={selectedActivity === a}
-          onPress={() => setSelectedActivity(a)}
-        />
-      )),
-    },
-    {
-      title: "Choose Duration",
-      content: durations.map((d) => (
-        <OptionButton
-          key={d}
-          label={d}
-          selected={selectedDuration === d}
-          onPress={() => setSelectedDuration(d)}
-        />
-      )),
-    },
-    {
-      title: "Choose Frequency",
-      content: frequencies.map((f) => (
-        <OptionButton
-          key={f}
-          label={f}
-          selected={selectedFrequency === f}
-          onPress={() => setSelectedFrequency(f)}
-        />
-      )),
-    },
-    {
-      title: "Set Your Stake",
-        content: (
-          <>
-          <DollarInput onChange={(v) => {
-            setStake(v);
-            if (v >= 0.50) {
-              setIsStakeValid(true);
-            }
-          }}/>
-         {!isStakeValid && <ThemedText variant="error" styles={{alignSelf: "center"}}>Minimum Stake is $0.50</ThemedText>}
-         </>
+  const { presentPayment, loading: paymentLoading } = useStripePayment();
+  const { mutateAsync: createCommitment, isPending: isCreatingCommitment } = useCreateCommitment();
 
-        ),
-      helper:
-        "If you succeed, you get your stake back + rewards. If you fail, you lose your stake.",
-    },
-    {
-      title: "Review & Lock In",
-      content: (
-        <View style={styles.reviewBox}>
-          <Text style={styles.reviewText}>
-            Activity: {selectedActivity}{"\n"}
-            Duration: {selectedDuration}{"\n"}
-            Frequency: {selectedFrequency}{"\n"}
-            Stake: ${stake}
-          </Text>
-        </View>
-      ),
-    },
-  ];
+  const handleStakeChange = (value: string) => {
+    setStake(value);
+    
+    // Clear validation error when user starts typing
+    if (!isStakeValid) {
+      setIsStakeValid(true);
+    }
+  };
 
-  const isLast = step === steps.length - 1;
+  const validateForm = () => {
+    if (!selectedActivity || !selectedDuration || !selectedFrequency) {
+      Alert.alert("Incomplete Form", "Please select all options before proceeding.");
+      return false;
+    }
 
-  const isFirst = step === 0;
+    const stakeAmount = parseFloat(stake);
+    if (isNaN(stakeAmount) || stakeAmount < 0.50) {
+      setIsStakeValid(false);
+      Alert.alert("Invalid Stake", "Minimum stake is $0.50");
+      return false;
+    }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.sectionTitle}>{steps[step].title}</Text>
-      <View style={styles.stepContent}>{steps[step].content}</View>
-      {steps[step].helper && <Text style={styles.helper}>{steps[step].helper}</Text>}
+    return true;
+  };
 
-      <View style={styles.buttonContainer}>
-        {!isFirst && (
-          <Pressable
-            style={[styles.backButton, styles.halfButton]}
-            onPress={() => setStep(step - 1)}
-          >
-            <Text style={styles.backButtonText}>Back</Text>
-          </Pressable>
-        )}
+  const handleLockIn = async () => {
+    if (!validateForm()) return;
+
+    const stakeAmount = parseFloat(stake);
+    
+    try {
+      // First, present the payment sheet
+      const paymentSuccess = await presentPayment(stakeAmount);
+      
+      if (paymentSuccess) {
+        // If payment is successful, create the commitment
+        const commitmentData = {
+          activity: selectedActivity!,
+          duration: selectedDuration!,
+          frequency: selectedFrequency!,
+          stake: stakeAmount,
+        };
         
-        <Pressable
-          style={[
-            styles.nextButton, 
-            isFirst ? styles.fullButton : styles.halfButton,
-            { marginTop: theme.button.margin }
-          ]}
-          onPress={async () => {
-            if(step===steps.length -2) {if(stake<0.50) {setIsStakeValid(false); return;}}
-            if (!isLast) setStep(step + 1);
-            else {
-              console.log("Lock In with data:", { selectedActivity, selectedDuration, selectedFrequency, stake });
-              await handlePayment()
-            };
-          }}
-        >
-          <Text style={styles.nextButtonText}>{isLast ? `Lock In with $${stake}` : "Next"}</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
+        // Create the commitment - this will automatically add it to the list via TanStack Query
+        await createCommitment(commitmentData);
+        
+        // Show success message and navigate back
+        Alert.alert(
+          "Success!",
+          "Your commitment has been created and locked in!",
+          [{ 
+            text: "OK", 
+            onPress: () => router.back() 
+          }]
+        );
+        
+        console.log("Commitment created successfully!");
+      }
+    } catch (error) {
+      console.error("Error creating commitment:", error);
+      Alert.alert(
+        "Error",
+        "Failed to create commitment. Please try again.",
+        [{ text: "OK" }]
+      );
+    }
+  };
 
-// ✅ Reusable option button
-function OptionButton({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
+  const isFormValid = selectedActivity && selectedDuration && selectedFrequency && parseFloat(stake) >= 0.50;
+  const isLoading = paymentLoading || isCreatingCommitment;
+
   return (
-    <Pressable style={[styles.option, selected && styles.optionSelected]} onPress={onPress}>
-      <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{label}</Text>
-    </Pressable>
+    <Background>
+      <ScrollView style={styles.container}>
+        <ThemedText variant="2xl" weight="bold" align="center" style={styles.title}>
+          Lock In Your Commitment
+        </ThemedText>
+
+        {/* Choose Activity */}
+        <View style={styles.section}>
+          <ThemedText variant="lg" weight="semibold" style={styles.sectionTitle}>
+            Choose Activity
+          </ThemedText>
+          <View style={styles.activityContainer}>
+            {activities.map((activity) => (
+              <Pressable
+                key={activity.id}
+                style={({ pressed }) => [
+                  styles.activityButton,
+                  selectedActivity === activity.id && styles.selectedButton,
+                  pressed && { opacity: 0.7 }
+                ]}
+                onPress={() => setSelectedActivity(activity.id)}
+              >
+                <ThemedText variant="lg" style={styles.emoji}>
+                  {activity.emoji}
+                </ThemedText>
+                <ThemedText 
+                  variant="base" 
+                  weight="medium"
+                  color={selectedActivity === activity.id ? 'inverse' : 'primary'}
+                >
+                  {activity.label}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {/* Choose Duration */}
+        <View style={styles.section}>
+          <ThemedText variant="lg" weight="semibold" style={styles.sectionTitle}>
+            Choose Duration
+          </ThemedText>
+          <View style={styles.durationGrid}>
+            {durations.map((duration) => (
+              <Pressable
+                key={duration}
+                style={({ pressed }) => [
+                  styles.durationButton,
+                  selectedDuration === duration && styles.selectedButton,
+                  pressed && { opacity: 0.7 }
+                ]}
+                onPress={() => setSelectedDuration(duration)}
+              >
+                <ThemedText 
+                  variant="base" 
+                  weight="medium"
+                  color={selectedDuration === duration ? 'inverse' : 'primary'}
+                  align="center"
+                >
+                  {duration}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {/* Choose Frequency */}
+        <View style={styles.section}>
+          <ThemedText variant="lg" weight="semibold" style={styles.sectionTitle}>
+            Choose Frequency
+          </ThemedText>
+          <View style={styles.frequencyContainer}>
+            {frequencies.map((frequency) => (
+              <Pressable
+                key={frequency}
+                style={({ pressed }) => [
+                  styles.frequencyButton,
+                  selectedFrequency === frequency && styles.selectedButton,
+                  pressed && { opacity: 0.7 }
+                ]}
+                onPress={() => setSelectedFrequency(frequency)}
+              >
+                <ThemedText 
+                  variant="base" 
+                  weight="medium"
+                  color={selectedFrequency === frequency ? 'inverse' : 'primary'}
+                  align="center"
+                >
+                  {frequency}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {/* Set Your Stake */}
+        <View style={styles.section}>
+          <ThemedText variant="lg" weight="semibold" style={styles.sectionTitle}>
+            How much do you want to lock in?
+          </ThemedText>
+          <MoneyInput
+            value={stake}
+            onChange={handleStakeChange}
+            error={!isStakeValid ? "Minimum stake is $0.50" : undefined}
+            maxAmount={10000}
+            style={styles.moneyInput}
+          />
+          <ThemedText variant="sm" color="secondary" align="center" style={styles.helperText}>
+            If you succeed, you get your stake back. If you fail, you lose your stake.
+          </ThemedText>
+        </View>
+
+        {/* Lock In Button */}
+        <Button
+          variant="filled"
+          size="lg"
+          style={styles.lockInButton}
+          onPress={handleLockIn}
+          disabled={!isFormValid || isLoading}
+        >
+          {isLoading ? "Processing..." : "Lock In"}
+        </Button>
+      </ScrollView>
+    </Background>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.background.color,
-    padding: theme.card.padding,
+    padding: theme.spacing[5],
+  },
+  title: {
+    marginBottom: theme.spacing[8],
+  },
+  section: {
+    marginBottom: theme.spacing[8],
   },
   sectionTitle: {
-    fontSize: theme.text.fontSizeXL,
-    fontWeight: theme.text.fontWeightBold as any,
-    color: theme.text.defaultColor,
-    marginBottom: theme.button.margin,
+    marginBottom: theme.spacing[4],
   },
-  stepContent: {
-    marginBottom: theme.card.margin,
+  activityContainer: {
+    flexDirection: "row",
+    gap: theme.spacing[4],
   },
-  option: {
-    borderWidth: theme.button.borderWidth,
-    borderColor: theme.button.borderColor,
-    borderRadius: theme.button.borderRadius,
-    padding: theme.button.padding,
-    margin: theme.button.margin,
-    backgroundColor: theme.card.background,
-  },
-  optionSelected: {
-    backgroundColor: theme.button.background,
-    borderColor: theme.button.background,
-  },
-  optionText: {
-    fontSize: theme.text.fontSizeBase,
-    color: theme.text.defaultColor,
-    textAlign: "center",
-  },
-  optionTextSelected: {
-    color: theme.button.color,
-    fontWeight: theme.text.fontWeightBold as any,
-  },
-  stakeInputWrapper: {
+  activityButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: theme.card.borderWidth,
-    borderColor: theme.card.border,
-    borderRadius: theme.card.radius,
-    paddingHorizontal: theme.button.padding,
-    marginVertical: theme.button.margin,
+    justifyContent: "center",
+    padding: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidths[2],
+    borderColor: theme.semantic.border.default,
+    backgroundColor: theme.semantic.background.primary,
+    gap: theme.spacing[2],
   },
-  dollar: {
-    fontSize: theme.text.fontSizeLarge,
-    color: theme.text.secondaryColor,
-    marginRight: theme.button.margin,
+  selectedButton: {
+    backgroundColor: theme.semantic.interactive.primary.default,
+    borderColor: theme.semantic.interactive.primary.default,
   },
-  stakeInput: {
-    flex: 1,
-    fontSize: theme.text.fontSizeLarge,
-    color: theme.text.defaultColor,
+  emoji: {
+    fontSize: 20,
   },
-  helper: {
-    fontSize: theme.text.fontSizeSmall,
-    color: theme.text.secondaryColor,
-  },
-  reviewBox: {
-    borderWidth: theme.card.borderWidth,
-    borderColor: theme.card.border,
-    borderRadius: theme.card.radius,
-    padding: theme.card.padding,
-    backgroundColor: theme.card.background,
-  },
-  reviewText: {
-    fontSize: theme.text.fontSizeBase,
-    color: theme.text.defaultColor,
-  },
-  buttonContainer: {
+  durationGrid: {
     flexDirection: "row",
-    gap: theme.button.margin,
+    flexWrap: "wrap",
+    gap: theme.spacing[3],
   },
-  nextButton: {
-    backgroundColor: theme.button.background,
-    borderRadius: theme.button.borderRadius,
-    padding: theme.button.padding,
+  durationButton: {
+    width: "48%",
+    padding: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidths[2],
+    borderColor: theme.semantic.border.default,
+    backgroundColor: theme.semantic.background.primary,
     alignItems: "center",
-    justifyContent: "center",
   },
-  backButton: {
-    backgroundColor: "transparent",
-    borderWidth: theme.button.borderWidth,
-    borderColor: theme.button.borderColor,
-    borderRadius: theme.button.borderRadius,
-    padding: theme.button.padding,
+  frequencyContainer: {
+    gap: theme.spacing[3],
+  },
+  frequencyButton: {
+    padding: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidths[2],
+    borderColor: theme.semantic.border.default,
+    backgroundColor: theme.semantic.background.primary,
     alignItems: "center",
-    justifyContent: "center",
   },
-  nextButtonText: {
-    color: theme.button.color,
-    fontSize: theme.text.fontSizeLarge,
-    fontWeight: theme.text.fontWeightBold as any,
+  moneyInput: {
+    marginVertical: theme.spacing[4],
   },
-  backButtonText: {
-    color: theme.text.defaultColor,
-    fontSize: theme.text.fontSizeLarge,
-    fontWeight: theme.text.fontWeightBold as any,
+  helperText: {
+    marginTop: theme.spacing[3],
   },
-  fullButton: {
-    flex: 1,
-  },
-  halfButton: {
-    flex: 1,
+  lockInButton: {
+    marginTop: theme.spacing[5],
+    marginBottom: theme.spacing[10],
   },
 });

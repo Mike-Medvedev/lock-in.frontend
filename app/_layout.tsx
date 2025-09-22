@@ -1,9 +1,19 @@
-import { Icon, ThemedText } from "@/components/ui";
-import { ThemeProvider } from "@/theme/themeContext";
 import { StripeProvider } from '@stripe/stripe-react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image } from "react-native";
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
+
 export default function RootLayout() {
   const [publishableKey, setPublishableKey] = useState('');
 
@@ -28,13 +38,38 @@ export default function RootLayout() {
     fetchPublishableKey();
   }, []);
 
-  return <StripeProvider publishableKey={publishableKey}
-  ><ThemeProvider>
-    <Stack>
-    <Stack.Screen name="index" options={{ headerTitle: () => <ThemedText variant="title">Lock-In</ThemedText>,
-  headerLeft: () => <Image style={{width: 40, height: 40, objectFit: "contain"}} source={require("@/assets/images/logo.png")}/>,
-  headerRight: () => <Icon name="notifications-outline" size="large" />}} />
-    </Stack>
-  </ThemeProvider>
-  </StripeProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <StripeProvider publishableKey={publishableKey}>
+        <Stack>
+          <Stack.Screen 
+            name="index" 
+            options={{ 
+              headerTitle: "Lock-In",
+              headerLeft: () => (
+                <Image 
+                  style={{width: 40, height: 40, objectFit: "contain"}} 
+                  source={require("@/assets/images/logo.png")}
+                />
+              ),
+            }} 
+          />
+        <Stack.Screen 
+          name="createCommitment" 
+          options={{ 
+            headerTitle: "Create Commitment",
+            presentation: "modal"
+          }} 
+        />
+        <Stack.Screen 
+          name="commitmentDetail" 
+          options={{ 
+            headerTitle: "Commitment Detail",
+            headerShown: false
+          }} 
+        />
+        </Stack>
+      </StripeProvider>
+    </QueryClientProvider>
+  );
 }

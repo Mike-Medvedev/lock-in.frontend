@@ -10,7 +10,17 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Lock-In"
+      "bundleIdentifier": "com.anonymous.Lock-In",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs location access to track your workout sessions and verify your commitment activities.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs location access to track your workout sessions and verify your commitment activities.",
+        "NSLocationAlwaysUsageDescription": "This app needs background location access to accurately track your workout sessions even when the app is not active.",
+        "NSHealthShareUsageDescription": "This app needs access to your health data to verify workout sessions and track fitness metrics like heart rate, steps, and calories burned.",
+        "NSHealthUpdateUsageDescription": "This app needs to save workout data to your Health app to keep a record of your verified fitness sessions.",
+        "NSMotionUsageDescription": "This app uses motion sensors to enhance workout tracking accuracy and detect movement patterns.",
+        "NSCameraUsageDescription": "This app may use the camera to capture workout verification photos.",
+        "NSMicrophoneUsageDescription": "This app may use the microphone for workout session notes or verification."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +30,16 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "ACTIVITY_RECOGNITION",
+        "BODY_SENSORS",
+        "CAMERA",
+        "RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -28,6 +47,16 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "This app needs location access to track your workout sessions and verify your commitment activities.",
+          "locationAlwaysPermission": "This app needs background location access to accurately track your workout sessions even when the app is not active.",
+          "locationWhenInUsePermission": "This app needs location access to track your workout sessions and verify your commitment activities.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
       [
         "expo-splash-screen",
         {

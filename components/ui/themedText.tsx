@@ -1,36 +1,36 @@
-import { useTheme } from "@/theme/themeContext"
-import { Text } from "react-native"
-import { TextStyle } from "react-native/Libraries/StyleSheet/StyleSheetTypes"
+import { theme } from '@/theme';
+import React from 'react';
+import { Text, TextProps, TextStyle } from 'react-native';
 
-interface Props {
-  children: React.ReactNode
-  variant?: "title" | "heading" | "default" | "secondary" | "success" | "error"
-  color?: string,
-  styles?: TextStyle
+interface ThemedTextProps extends Omit<TextProps, 'style'> {
+  variant?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+  color?: 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'success' | 'error' | 'warning' | 'disabled';
+  weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
+  align?: 'left' | 'center' | 'right';
+  style?: TextStyle;
+  children: React.ReactNode;
 }
 
-export default function ThemedText({ children, color, variant = "default", styles }: Props) {
-  const theme = useTheme()
+export const ThemedText: React.FC<ThemedTextProps> = ({
+  variant = 'base',
+  color = 'primary',
+  weight = 'normal',
+  align = 'left',
+  style,
+  children,
+  ...props
+}) => {
+  const textStyle: TextStyle = {
+    fontSize: theme.typography.fontSizes[variant],
+    fontWeight: theme.typography.fontWeights[weight] as any,
+    color: theme.semantic.text[color],
+    textAlign: align,
+    lineHeight: theme.typography.fontSizes[variant] * 1.2, // Tighter line height
+  };
 
-  const fontSize =
-    variant === "title"
-      ? theme.text.fontSizeXL
-      : variant === "heading"
-      ? theme.text.fontSizeLarge
-      : theme.text.fontSizeBase
-
-  const textColor =
-    color
-      ? color
-      : variant === "secondary"
-      ? theme.text.secondaryColor 
-      : variant === "success"
-      ? theme.text.successText
-      : variant === "error"
-      ? theme.text.errorText
-      : theme.text.defaultColor
-    
-    const fontWeight = variant === "success" ?  theme.text.fontWeightBold : theme.text.fontWeightNormal
-
-  return <Text style={[{ color: textColor, fontSize: fontSize, fontWeight: fontWeight as any }, styles]}>{children}</Text>
-}
+  return (
+    <Text style={[textStyle, style]} {...props}>
+      {children}
+    </Text>
+  );
+};
