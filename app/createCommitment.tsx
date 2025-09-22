@@ -9,7 +9,7 @@ import { useStripePayment } from "@/hooks/useStripePayment";
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 const activities = [
   { id: "running", label: "Running", emoji: "🏃‍♂️" },
@@ -27,6 +27,8 @@ export default function CreateCommitment() {
   const [selectedFrequency, setSelectedFrequency] = useState<string | null>(null);
   const [stake, setStake] = useState("50");
   const [isStakeValid, setIsStakeValid] = useState(true);
+  const [isDurationOpen, setIsDurationOpen] = useState(false);
+  const [isFrequencyOpen, setIsFrequencyOpen] = useState(false);
 
   const { presentPayment, loading: paymentLoading } = useStripePayment();
   const { mutateAsync: createCommitment, isPending: isCreatingCommitment } = useCreateCommitment();
@@ -105,9 +107,7 @@ export default function CreateCommitment() {
   return (
     <Background>
       <ScrollView style={styles.container}>
-        <ThemedText variant="2xl" weight="bold" align="center" style={styles.title}>
-          Lock In Your Commitment
-        </ThemedText>
+
 
         {/* Choose Activity */}
         <View style={styles.section}>
@@ -145,28 +145,35 @@ export default function CreateCommitment() {
           <ThemedText variant="lg" weight="semibold" style={styles.sectionTitle}>
             Choose Duration
           </ThemedText>
-          <View style={styles.durationGrid}>
-            {durations.map((duration) => (
-              <Pressable
-                key={duration}
-                style={({ pressed }) => [
-                  styles.durationButton,
-                  selectedDuration === duration && styles.selectedButton,
-                  pressed && { opacity: 0.7 }
-                ]}
-                onPress={() => setSelectedDuration(duration)}
-              >
-                <ThemedText 
-                  variant="base" 
-                  weight="medium"
-                  color={selectedDuration === duration ? 'inverse' : 'primary'}
-                  align="center"
-                >
-                  {duration}
-                </ThemedText>
-              </Pressable>
-            ))}
-          </View>
+          <Pressable
+            style={({ pressed }) => [styles.selectInput, pressed && { opacity: 0.8 }]}
+            onPress={() => setIsDurationOpen(true)}
+          >
+            <ThemedText variant="base" weight="medium" color="primary" style={styles.selectText}>
+              {selectedDuration ?? "Select duration"}
+            </ThemedText>
+          </Pressable>
+
+          <Modal visible={isDurationOpen} transparent animationType="fade" onRequestClose={() => setIsDurationOpen(false)}>
+            <Pressable style={styles.modalOverlay} onPress={() => setIsDurationOpen(false)}>
+              <View style={styles.modalContent}>
+                {durations.map((duration) => (
+                  <Pressable
+                    key={duration}
+                    style={({ pressed }) => [styles.optionItem, pressed && { opacity: 0.7 }, selectedDuration === duration && styles.selectedOption]}
+                    onPress={() => {
+                      setSelectedDuration(duration);
+                      setIsDurationOpen(false);
+                    }}
+                  >
+                    <ThemedText variant="base" weight="medium" color={selectedDuration === duration ? 'inverse' : 'primary'} style={styles.optionText}>
+                      {duration}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            </Pressable>
+          </Modal>
         </View>
 
         {/* Choose Frequency */}
@@ -174,28 +181,35 @@ export default function CreateCommitment() {
           <ThemedText variant="lg" weight="semibold" style={styles.sectionTitle}>
             Choose Frequency
           </ThemedText>
-          <View style={styles.frequencyContainer}>
-            {frequencies.map((frequency) => (
-              <Pressable
-                key={frequency}
-                style={({ pressed }) => [
-                  styles.frequencyButton,
-                  selectedFrequency === frequency && styles.selectedButton,
-                  pressed && { opacity: 0.7 }
-                ]}
-                onPress={() => setSelectedFrequency(frequency)}
-              >
-                <ThemedText 
-                  variant="base" 
-                  weight="medium"
-                  color={selectedFrequency === frequency ? 'inverse' : 'primary'}
-                  align="center"
-                >
-                  {frequency}
-                </ThemedText>
-              </Pressable>
-            ))}
-          </View>
+          <Pressable
+            style={({ pressed }) => [styles.selectInput, pressed && { opacity: 0.8 }]}
+            onPress={() => setIsFrequencyOpen(true)}
+          >
+            <ThemedText variant="base" weight="medium" color="primary" style={styles.selectText}>
+              {selectedFrequency ?? "Select frequency"}
+            </ThemedText>
+          </Pressable>
+
+          <Modal visible={isFrequencyOpen} transparent animationType="fade" onRequestClose={() => setIsFrequencyOpen(false)}>
+            <Pressable style={styles.modalOverlay} onPress={() => setIsFrequencyOpen(false)}>
+              <View style={styles.modalContent}>
+                {frequencies.map((frequency) => (
+                  <Pressable
+                    key={frequency}
+                    style={({ pressed }) => [styles.optionItem, pressed && { opacity: 0.7 }, selectedFrequency === frequency && styles.selectedOption]}
+                    onPress={() => {
+                      setSelectedFrequency(frequency);
+                      setIsFrequencyOpen(false);
+                    }}
+                  >
+                    <ThemedText variant="base" weight="medium" color={selectedFrequency === frequency ? 'inverse' : 'primary'} style={styles.optionText}>
+                      {frequency}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            </Pressable>
+          </Modal>
         </View>
 
         {/* Set Your Stake */}
@@ -268,18 +282,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   durationGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.spacing[3],
   },
   durationButton: {
-    width: "48%",
-    padding: theme.spacing[4],
-    borderRadius: theme.borderRadius.md,
-    borderWidth: theme.borderWidths[2],
-    borderColor: theme.semantic.border.default,
-    backgroundColor: theme.semantic.background.primary,
-    alignItems: "center",
   },
   frequencyContainer: {
     gap: theme.spacing[3],
@@ -291,6 +295,41 @@ const styles = StyleSheet.create({
     borderColor: theme.semantic.border.default,
     backgroundColor: theme.semantic.background.primary,
     alignItems: "center",
+  },
+  selectInput: {
+    padding: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidths[2],
+    borderColor: theme.semantic.border.default,
+    backgroundColor: theme.semantic.background.primary,
+  },
+  selectText: {
+    textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.spacing[5],
+  },
+  modalContent: {
+    width: '100%',
+    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.semantic.background.primary,
+    overflow: 'hidden',
+  },
+  optionItem: {
+    padding: theme.spacing[4],
+    borderBottomWidth: theme.borderWidths[1],
+    borderBottomColor: theme.semantic.border.subtle,
+    alignItems: 'center',
+  },
+  selectedOption: {
+    backgroundColor: theme.semantic.interactive.primary.default,
+  },
+  optionText: {
+    textAlign: 'center',
   },
   moneyInput: {
     marginVertical: theme.spacing[4],

@@ -1,4 +1,5 @@
 import { theme } from '@/theme';
+import LottieView from 'lottie-react-native';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Dimensions, Modal, StyleSheet, View } from 'react-native';
 import { Button } from './Button';
@@ -19,7 +20,7 @@ interface CelebrationModalProps {
   payoutError?: string;
 }
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   visible,
@@ -29,62 +30,85 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   isProcessingPayout = false,
   payoutError,
 }) => {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(height)).current;
-  const confettiAnim = useRef(new Animated.Value(0)).current;
+  const confettiAnim = useRef(new Animated.Value(0)).current; // used for confetti on claim
+  const rotateAnim = useRef(new Animated.Value(0)).current; // trophy spin on open
+  const lottieRef = useRef<LottieView>(null);
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const hasAnimatedRef = useRef(false);
+  
+  
 
   useEffect(() => {
     if (visible) {
-      // Reset animations
-      scaleAnim.setValue(0);
-      rotateAnim.setValue(0);
-      slideAnim.setValue(height);
+      if (hasAnimatedRef.current) return;
+      hasAnimatedRef.current = true;
+      // Open effects: trophy spin and confetti burst
       confettiAnim.setValue(0);
-
-      // Start animations
+      rotateAnim.setValue(0);
+      shakeAnim.setValue(0);
       Animated.parallel([
-        // Slide up
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8,
-        }),
-        // Scale in
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8,
-        }),
-        // Rotate
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        // Confetti
         Animated.timing(confettiAnim, {
           toValue: 1,
-          duration: 2000,
+          duration: 1600,
           useNativeDriver: true,
         }),
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.sequence([
+          Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: -6, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+        ]),
       ]).start();
+
+      // Play lottie on open
+      requestAnimationFrame(() => {
+        lottieRef.current?.reset();
+        lottieRef.current?.play();
+      });
+    } else {
+      // allow re-run next time modal opens
+      hasAnimatedRef.current = false;
     }
   }, [visible]);
-
-  const rotateInterpolation = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
 
   const confettiOpacity = confettiAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0, 1, 0],
   });
 
+  const rotateInterpolation = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
   const totalReward = commitment.stake + (commitment.bonus || 0);
+
+  const handleClaimPress = () => {
+    // Trigger a quick shake/jiggle and confetti burst, then call the handler
+    confettiAnim.setValue(0);
+    Animated.parallel([
+      Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -6, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+      ]),
+      Animated.timing(confettiAnim, { toValue: 1, duration: 1200, useNativeDriver: true }),
+    ]).start(() => {
+      onClaimReward();
+    });
+
+    // Replay lottie burst
+    lottieRef.current?.reset();
+    lottieRef.current?.play();
+  };
 
   return (
     <Modal
@@ -94,40 +118,20 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        {/* Confetti effect */}
-        <Animated.View 
-          style={[
-            styles.confetti,
-            { opacity: confettiOpacity }
-          ]}
-        >
-          {Array.from({ length: 20 }, (_, i) => (
-            <Animated.View
-              key={i}
-              style={[
-                styles.confettiPiece,
-                {
-                  left: Math.random() * width,
-                  backgroundColor: [
-                    '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'
-                  ][Math.floor(Math.random() * 5)],
-                  transform: [
-                    {
-                      rotate: rotateInterpolation,
-                    },
-                  ],
-                },
-              ]}
-            />
-          ))}
+        {/* Confetti effect (render above content) */}
+        <Animated.View pointerEvents="none" style={[styles.confetti, { opacity: confettiOpacity }]}> 
+          <LottieView
+            ref={lottieRef}
+            source={require('../../assets/confetti.json')}
+            autoPlay={false}
+            loop={false}
+            style={styles.lottie}
+          />
         </Animated.View>
 
         <Animated.View
           style={[
             styles.container,
-            {
-              transform: [{ translateY: slideAnim }],
-            },
           ]}
         >
           <View style={styles.content}>
@@ -135,12 +139,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
             <Animated.View
               style={[
                 styles.trophyContainer,
-                {
-                  transform: [
-                    { scale: scaleAnim },
-                    { rotate: rotateInterpolation },
-                  ],
-                },
+                { transform: [{ rotate: rotateInterpolation }] },
               ]}
             >
               <Icon name="trophy" size="xl" color="warning" />
@@ -191,29 +190,31 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
 
             {/* Buttons */}
             <View style={styles.buttonContainer}>
-              <Button
+              <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
+                <Button
                 variant="filled"
                 size="lg"
                 style={styles.claimButton}
-                onPress={onClaimReward}
+                onPress={handleClaimPress}
                 disabled={isProcessingPayout}
-              >
-                {isProcessingPayout ? (
-                  <>
-                    <Icon name="hourglass-outline" size="sm" color="inverse" />
-                    <ThemedText variant="base" color="inverse" weight="semibold">
-                      Processing...
-                    </ThemedText>
-                  </>
-                ) : (
-                  <>
-                    <Icon name="cash-outline" size="sm" color="inverse" />
-                    <ThemedText variant="base" color="inverse" weight="semibold">
-                      Claim Reward
-                    </ThemedText>
-                  </>
-                )}
-              </Button>
+                >
+                  {isProcessingPayout ? (
+                    <>
+                      <Icon name="hourglass-outline" size="sm" color="inverse" />
+                      <ThemedText variant="base" color="inverse" weight="semibold">
+                        Processing...
+                      </ThemedText>
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="cash-outline" size="sm" color="inverse" />
+                      <ThemedText variant="base" color="inverse" weight="semibold">
+                        Claim Reward
+                      </ThemedText>
+                    </>
+                  )}
+                </Button>
+              </Animated.View>
 
               <Button
                 variant="outlined"
@@ -247,6 +248,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    zIndex: 2,
+  },
+  lottie: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   confettiPiece: {
     position: 'absolute',
@@ -257,6 +266,7 @@ const styles = StyleSheet.create({
   container: {
     width: width * 0.9,
     maxWidth: 400,
+    zIndex: 1,
   },
   content: {
     backgroundColor: theme.semantic.background.primary,

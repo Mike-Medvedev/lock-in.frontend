@@ -261,19 +261,6 @@ export default function CommitmentDetail() {
     try {
       const result = await executePayout(commitment);
       
-      if (result.success) {
-        Alert.alert(
-          "💰 Payout Successful!",
-          `Your reward of $${result.amount?.toFixed(2)} has been processed. Transaction ID: ${result.transactionId}`,
-          [{ text: "Great!", onPress: () => setShowCelebration(false) }]
-        );
-      } else {
-        Alert.alert(
-          "❌ Payout Failed",
-          result.error || "Failed to process payout. Please try again.",
-          [{ text: "OK" }]
-        );
-      }
     } catch (error) {
       Alert.alert(
         "❌ Payout Error",
